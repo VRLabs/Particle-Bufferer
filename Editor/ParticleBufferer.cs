@@ -1,10 +1,9 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using UnityEditor;
 using UnityEngine;
+#if VRCHAT_AVATARS
 using VRC.SDK3.Avatars.Components;
-
+#endif
 namespace VRLabs.ParticleBufferer
 {
 	public static class ParticleBufferer
@@ -105,6 +104,7 @@ namespace VRLabs.ParticleBufferer
 
 		public static void UpdateAnimationsForParticles(ParticleSystem bufferParticle, ParticleSystem[] subParticles)
 		{
+			#if VRCHAT_AVATARS
 			VRCAvatarDescriptor descriptor = bufferParticle.gameObject.GetComponentsInParent<VRCAvatarDescriptor>().FirstOrDefault();
 			if (descriptor == null) return;
 			
@@ -138,6 +138,7 @@ namespace VRLabs.ParticleBufferer
                 }
             }
             finally { AssetDatabase.StopAssetEditing();  }
+			#endif
 		}
 	}
 }
