@@ -18,8 +18,6 @@ namespace VRLabs.ParticleBufferer
 			bufferParticle.transform.rotation = Quaternion.identity;
 			GameObjectUtility.EnsureUniqueNameForSibling(bufferParticle.gameObject);
 			
-			bufferParticle.transform.SetSiblingIndex(particle.transform.GetSiblingIndex());
-			
 			var subEmitterModule = bufferParticle.subEmitters;
 			subEmitterModule.enabled = true;
 			subEmitterModule.AddSubEmitter(particle, ParticleSystemSubEmitterType.Birth, ParticleSystemSubEmitterProperties.InheritNothing);
