@@ -12,7 +12,8 @@
 
 A tool for turning particles into buffer particles.
 
-TODO IMAGE
+![Particle-Bufferer](https://github.com/user-attachments/assets/5d0307b6-c20f-4d28-88e9-b15d13a9dc75)
+
 
 ### ⬇️ [Download Latest Version](https://github.com/VRLabs/Particle-Bufferer/releases/latest)
 
