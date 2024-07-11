@@ -8,25 +8,29 @@ namespace VRLabs.ParticleBufferer
 {
 	public class BufferParticleCreator
 	{
-		public static ParticleSystem CreateBufferParticleFromTarget(GameObject go)
+		public static ParticleSystem CreateBufferParticleFromTarget(ParticleSystem particle)
 		{
-			var particle = go.GetComponent<ParticleSystem>();
-			if (particle == null) return null;
+			ApplySubParticleSettings(particle);
+			particle.gameObject.SetActive(true);
+
+			var bufferParticle = CreateBufferParticleBase();
+			CopyTransformSettings(particle.transform, bufferParticle.transform);
+			bufferParticle.transform.rotation = Quaternion.identity;
+			GameObjectUtility.EnsureUniqueNameForSibling(bufferParticle.gameObject);
 			
-			Undo.RecordObject(go, "Create Buffer Particle");
-			go.SetActive(true);
-			var bps = CreateBufferParticle(particle);
-			bps.gameObject.name = go.name;
-			go.name += " (Sub)";
-			GameObjectUtility.EnsureUniqueNameForSibling(go);
-			EditorUtility.SetDirty(go);
-			return bps;
+			bufferParticle.transform.SetSiblingIndex(particle.transform.GetSiblingIndex());
+			
+			var subEmitterModule = bufferParticle.subEmitters;
+			subEmitterModule.enabled = true;
+			subEmitterModule.AddSubEmitter(particle, ParticleSystemSubEmitterType.Birth, ParticleSystemSubEmitterProperties.InheritNothing);
+			return bufferParticle;
 		}
 		
-		public static void CreateBufferParticle(out ParticleSystem bufferParticle, out ParticleSystem subParticle)
+		public static void CreateDefaultBufferParticle(out ParticleSystem bufferParticle, out ParticleSystem subParticle)
 		{
 			var subGameObject = new GameObject("Sub Particle");
 			subParticle = subGameObject.AddComponent<ParticleSystem>();
+			Undo.RegisterCreatedObjectUndo(subParticle.gameObject, "Create Buffer Particle");
 			
 			#region Default Sub Particle Settings
 			var main = subParticle.main;
@@ -41,33 +45,16 @@ namespace VRLabs.ParticleBufferer
 			emission.SetBursts(new []{new ParticleSystem.Burst(0,1)});
 			#endregion
 			
-			Undo.RegisterCreatedObjectUndo(subGameObject, "Create Buffer Particle");
-			bufferParticle = CreateBufferParticle(subParticle);
-		}
-		
-		public static ParticleSystem CreateBufferParticle(ParticleSystem subParticle)
-		{
-			ApplySubParticleSettings(subParticle);
-			var bps = CreateBufferParticleBase();
-			CopyTransformSettings(subParticle.transform, bps.transform);
-			bps.transform.rotation = Quaternion.identity;
-			GameObjectUtility.EnsureUniqueNameForSibling(bps.gameObject);
-			
-			bps.transform.SetSiblingIndex(subParticle.transform.GetSiblingIndex());
-			
-			var sem = bps.subEmitters;
-			sem.enabled = true;
-			sem.AddSubEmitter(subParticle, ParticleSystemSubEmitterType.Birth, ParticleSystemSubEmitterProperties.InheritNothing);
-			return bps;
+			bufferParticle = CreateBufferParticleFromTarget(subParticle);
 		}
 
 		public static ParticleSystem CreateBufferParticleBase()
 		{
 			GameObject bufferParticleObject = new GameObject("Buffer Particle");
+			Undo.RegisterCreatedObjectUndo(bufferParticleObject, "Create Buffer Particle");
 			bufferParticleObject.SetActive(false);
 			ParticleSystem bufferParticle = bufferParticleObject.AddComponent<ParticleSystem>();
 			Object.DestroyImmediate(bufferParticleObject.GetComponent<ParticleSystemRenderer>());
-			Undo.RegisterCreatedObjectUndo(bufferParticleObject, "Create Buffer Particle");
 			
 			#region Buffer Particle Settings
 			var main = bufferParticle.main;
@@ -91,7 +78,7 @@ namespace VRLabs.ParticleBufferer
 
 		public static void ApplySubParticleSettings(ParticleSystem subParticle)
 		{
-			Undo.RecordObject(subParticle, "Apply Sub Particle Settings");
+			Undo.RecordObject(subParticle.gameObject, "Adjust Sub Particle");
 			var main = subParticle.main;
 			main.loop = false;
 			main.playOnAwake = false;
