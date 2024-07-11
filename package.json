@@ -1,0 +1,26 @@
+{
+  "name": "dev.vrlabs.particle-bufferer",
+  "displayName": "Particle Bufferer",
+  "version": "1.0.999",
+  "license": "MIT",
+  "unity": "2019.4",
+  "description": "A tool for turning particles into buffer particles.",
+  "author": {
+    "name": "VRLabs",
+    "email": "mail@vrlabs.dev",
+    "url": "https://vrlabs.dev"
+  },
+  "siteUrl": "https://github.com/VRLabs/Particle-Bufferer",
+  "vpmDependencies": {},
+  "legacyFolders": {},
+  "unityPackageDestinationFolder": "Assets/VRLabs/Particle-Bufferer",
+  "unityPackageDestinationFolderMetas": {
+    "Assets/VRLabs": "652a1ba5b00554143bc9a76307dbc4e8",
+    "Assets/VRLabs/Particle-Bufferer": "84d6f00cc81b69845bd84ce2c279ca6a"
+  },
+  "vccRepoCategory": "components",
+  "media": {
+    "previewImage": "https://raw.githubusercontent.com/VRLabs/Particle-Bufferer/main/Media/Web/Preview.webp",
+    "previewGif": "https://raw.githubusercontent.com/VRLabs/Particle-Bufferer/main/Media/Web/Preview.webp"
+  }
+}
