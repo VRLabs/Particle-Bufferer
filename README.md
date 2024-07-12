@@ -16,7 +16,7 @@ A tool for creating buffer particles
 
 ### ⬇️ [Download Latest Version](https://github.com/VRLabs/Particle-Bufferer/releases/latest)
 
-### 📦 [Add to VRChat Creator Companion](https://vrlabs.dev/packages?package=particle-bufferer)
+### 📦 [Add to VRChat Creator Companion](https://vrlabs.dev/packages?package=dev.vrlabs.particle-bufferer)
 
 </div>
 
