@@ -24,7 +24,7 @@ A tool for creating buffer particles
 
 ## How to use
 
-You can run the tool by right clicking on one or more GameObjects and using the options under `Effects > Particle Bufferer`.
+You can run the tool by right clicking on one or more GameObjects and using the options under `Effects` -> `Particle Bufferer`.
 
 These options are:
 
