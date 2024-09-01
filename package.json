@@ -3,7 +3,7 @@
   "displayName": "Particle Bufferer",
   "version": "1.0.999",
   "license": "MIT",
-  "unity": "2019.4",
+  "unity": "2022.3",
   "description": "A tool for turning particles into buffer particles.",
   "author": {
     "name": "VRLabs",
@@ -22,5 +22,6 @@
   "media": {
     "previewImage": "https://raw.githubusercontent.com/VRLabs/Particle-Bufferer/main/Media/Web/Preview.webp",
     "previewGif": "https://raw.githubusercontent.com/VRLabs/Particle-Bufferer/main/Media/Web/Preview.webp"
-  }
+  },
+  "questCompatibility": "full"
 }
