@@ -18,13 +18,21 @@ namespace VRLabs.ParticleBufferer
 		#region Validation
 		
 		public static bool SelectionHasParticleSystem() => Selection.gameObjects.Any(go => go != null && go.GetComponent<ParticleSystem>() != null);
-		
+		public static bool SelectionHasParticleSystemWithRenderer() => Selection.gameObjects.Any(go => go != null && go.GetComponent<ParticleSystem>() != null && go.GetComponent<ParticleSystemRenderer>() != null);
+		public static bool SelectionHasParticleSystemWithNoRenderer() => Selection.gameObjects.Any(go => go != null && go.GetComponent<ParticleSystem>() != null && go.GetComponent<ParticleSystemRenderer>() == null);
+
 		[MenuItem("GameObject/Effects/Buffer Particle/From Selected", true, 1000)]
 		public static bool CreateBufferParticleFromSelectedValidate() => SelectionHasParticleSystem();
 
 		[MenuItem("GameObject/Effects/Buffer Particle/For Each Selected", true, 1001)]
 		public static bool CreateBufferParticleForEachSelectedValidate() => SelectionHasParticleSystem();
-		
+
+		[MenuItem("GameObject/Effects/Particle System Renderer/Add Renderer", true, 1003)]
+		public static bool AddParticleSystemRendererValidate() => SelectionHasParticleSystem() && SelectionHasParticleSystemWithNoRenderer();
+
+		[MenuItem("GameObject/Effects/Particle System Renderer/Remove Renderer", true, 1004)]
+		public static bool RemoveParticleSystemRendererValidate() => SelectionHasParticleSystem() && SelectionHasParticleSystemWithRenderer();
+
 		#endregion
 
 		[MenuItem("GameObject/Effects/Buffer Particle/From Selected", false, 1000)]
@@ -38,7 +46,7 @@ namespace VRLabs.ParticleBufferer
 			
 			ParticleSystem firstParticle = particles.Aggregate((c, d) => c.transform.GetSiblingIndex() < d.transform.GetSiblingIndex() ? c : d); // Get the lowest sibling index particle
 			
-			var bufferParticle = BufferParticleCreator.CreateBufferParticleFromTarget(firstParticle);
+			var bufferParticle = BufferParticleCreator.CreateBufferParticleFromTarget(firstParticle, withRenderer: true);
 			
 			var subEmitterModule = bufferParticle.subEmitters;
 			for (int i = 0; i < particles.Count; i++)
@@ -65,10 +73,10 @@ namespace VRLabs.ParticleBufferer
 			
 			foreach (var subParticle in particles)
 			{
-				ParticleSystem bufferParticle = BufferParticleCreator.CreateBufferParticleFromTarget(subParticle);
+				ParticleSystem bufferParticle = BufferParticleCreator.CreateBufferParticleFromTarget(subParticle, withRenderer: true);
 				UpdateAnimationsForParticles(bufferParticle, new []{subParticle});
 			}
-			
+
 		}
 
 		[MenuItem("GameObject/Effects/Buffer Particle/Empty", false, 1002)]
@@ -76,12 +84,12 @@ namespace VRLabs.ParticleBufferer
 		{
 			if (doneThisFrame) return;
 			doneThisFrame = true;
-			
-			var targets = Selection.gameObjects.Any() ? Selection.gameObjects : new GameObject[] {null};
+
+			var targets = Selection.gameObjects.Any() ? Selection.gameObjects : new GameObject[] { null };
 			foreach (var go in targets)
 			{
 				Transform parent = go == null ? null : go.transform;
-				BufferParticleCreator.CreateDefaultBufferParticle(out var bufferParticle, out var subParticle);
+				BufferParticleCreator.CreateDefaultBufferParticle(out var bufferParticle, out var subParticle, withRenderer: true);
 
 				if (parent == null)
 				{
@@ -89,16 +97,62 @@ namespace VRLabs.ParticleBufferer
 					GameObjectUtility.EnsureUniqueNameForSibling(subParticle.gameObject);
 					continue;
 				}
-				
+
 				BufferParticleCreator.CopyTransformSettings(parent, bufferParticle.transform);
 				BufferParticleCreator.CopyTransformSettings(bufferParticle.transform, subParticle.transform);
-				
+
 				bufferParticle.transform.parent = parent;
 				subParticle.transform.parent = parent;
 				bufferParticle.transform.rotation = Quaternion.identity;
 
 				GameObjectUtility.EnsureUniqueNameForSibling(bufferParticle.gameObject);
 				GameObjectUtility.EnsureUniqueNameForSibling(subParticle.gameObject);
+			}
+		}
+
+		[MenuItem("GameObject/Effects/Particle System Renderer/Add Renderer", false, 1003)]
+		public static void AddParticleSystemRenderer()
+		{
+			if (doneThisFrame) return;
+			doneThisFrame = true;
+
+			var particles = Selection.gameObjects.Select(go => go == null ? null : go.GetComponent<ParticleSystem>()).Where(ps => ps != null).ToList();
+			if (!particles.Any()) return;
+
+			foreach (var particle in particles)
+            {
+				if (particle.gameObject.GetComponent<ParticleSystem>() != null)
+				{
+					if (particle.gameObject.GetComponent<ParticleSystemRenderer>() == null)
+					{
+						Undo.AddComponent<ParticleSystemRenderer>(particle.gameObject);
+
+						if (particle.GetComponent<ParticleSystemRenderer>() != null)
+                        {
+							particle.GetComponent<ParticleSystemRenderer>().enabled = false;
+							particle.GetComponent<ParticleSystemRenderer>().renderMode = ParticleSystemRenderMode.None;
+                        }
+					}
+				}
+			}
+		}
+
+		[MenuItem("GameObject/Effects/Particle System Renderer/Remove Renderer", false, 1004)]
+		public static void RemoveParticleSystemRenderer()
+		{
+			if (doneThisFrame) return;
+			doneThisFrame = true;
+
+			var particles = Selection.gameObjects.Select(go => go == null ? null : go.GetComponent<ParticleSystem>()).Where(ps => ps != null).ToList();
+			if (!particles.Any()) return;
+
+			foreach (var particle in particles)
+			{
+				if (particle.gameObject.GetComponent<ParticleSystem>() != null)
+				{
+					if (particle.gameObject.GetComponent<ParticleSystemRenderer>() != null)
+						Undo.DestroyObjectImmediate(particle.gameObject.GetComponent<ParticleSystemRenderer>());
+				}
 			}
 		}
 

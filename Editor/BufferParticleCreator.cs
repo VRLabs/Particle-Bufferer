@@ -1,19 +1,18 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using UnityEditor;
+﻿using UnityEditor;
 using UnityEngine;
 
 namespace VRLabs.ParticleBufferer
 {
 	public class BufferParticleCreator
 	{
-		public static ParticleSystem CreateBufferParticleFromTarget(ParticleSystem particle)
+		public static ParticleSystem CreateBufferParticleFromTarget(ParticleSystem particle, bool withRenderer)
 		{
+			Undo.RecordObject(particle, "Create Particle From Target");
+
 			ApplySubParticleSettings(particle);
 			particle.gameObject.SetActive(true);
 
-			var bufferParticle = CreateBufferParticleBase();
+			var bufferParticle = CreateBufferParticleBase(withRenderer);
 			CopyTransformSettings(particle.transform, bufferParticle.transform);
 			bufferParticle.transform.rotation = Quaternion.identity;
 			GameObjectUtility.EnsureUniqueNameForSibling(bufferParticle.gameObject);
@@ -24,7 +23,7 @@ namespace VRLabs.ParticleBufferer
 			return bufferParticle;
 		}
 		
-		public static void CreateDefaultBufferParticle(out ParticleSystem bufferParticle, out ParticleSystem subParticle)
+		public static void CreateDefaultBufferParticle(out ParticleSystem bufferParticle, out ParticleSystem subParticle, bool withRenderer)
 		{
 			var subGameObject = new GameObject("Sub Particle");
 			subParticle = subGameObject.AddComponent<ParticleSystem>();
@@ -43,24 +42,28 @@ namespace VRLabs.ParticleBufferer
 			emission.SetBursts(new []{new ParticleSystem.Burst(0,1)});
 			#endregion
 			
-			bufferParticle = CreateBufferParticleFromTarget(subParticle);
+			bufferParticle = CreateBufferParticleFromTarget(subParticle, withRenderer);
 		}
 
-		public static ParticleSystem CreateBufferParticleBase()
+		public static ParticleSystem CreateBufferParticleBase(bool withRenderer)
 		{
 			GameObject bufferParticleObject = new GameObject("Buffer Particle");
 			Undo.RegisterCreatedObjectUndo(bufferParticleObject, "Create Buffer Particle");
 			bufferParticleObject.SetActive(false);
 			ParticleSystem bufferParticle = bufferParticleObject.AddComponent<ParticleSystem>();
-			Object.DestroyImmediate(bufferParticleObject.GetComponent<ParticleSystemRenderer>());
-			
+
+			if (withRenderer)
+				bufferParticle.GetComponent<ParticleSystemRenderer>().enabled = false;
+			else
+				Object.DestroyImmediate(bufferParticleObject.GetComponent<ParticleSystemRenderer>());
+
 			#region Buffer Particle Settings
 			var main = bufferParticle.main;
 			main.duration = 1;
 			main.playOnAwake = true;
 			main.loop = false;
 			main.startLifetime = 1000;
-			main.startSpeed = 0.0001f;
+			main.startSpeed = 0.001f;
 			main.maxParticles = 1;
 
 			var em = bufferParticle.emission;
@@ -69,6 +72,10 @@ namespace VRLabs.ParticleBufferer
 			
 			var shape = bufferParticle.shape;
 			shape.enabled = false;
+
+			if (withRenderer)
+				bufferParticle.GetComponent<ParticleSystemRenderer>().renderMode = ParticleSystemRenderMode.None;
+
 			#endregion
 
 			return bufferParticle;
